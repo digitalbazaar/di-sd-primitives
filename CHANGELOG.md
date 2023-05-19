@@ -1,6 +1,6 @@
-# @digitalbazaar/eddsa-2022-cryptosuite Changelog
+# @digitalbazaar/di-sd-primitives Changelog
 
-## 1.0.0 - 2022-09-08
+## 1.0.0 - 2023-05-dd
 
 ### Added
 - Initial version.
