@@ -19,11 +19,10 @@
     "./lib/hmac.js": "./lib/hmac-browser.js"
   },
   "dependencies": {
-    "base58-universal": "^2.0.0",
     "base64url-universal": "^2.0.0",
-    "cborg": "^1.10.2",
     "jsonld": "digitalbazaar/jsonld.js#canonicalIdMap",
-    "klona": "^2.0.6"
+    "klona": "^2.0.6",
+    "rdf-canonize": "digitalbazaar/rdf-canonize#3.x-identifierMap"
   },
   "devDependencies": {
     "@digitalbazaar/data-integrity": "^1.3.1",
