@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 2.0.1 - 2023-05-dd
+## 2.0.1 - 2023-05-19
 
 ### Fixed
 - Fix matching N-Quads bug.
