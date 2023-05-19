@@ -1,10 +1,11 @@
-# Eddsa 2022 Data Integrity Cryptosuite _(@digitalbazaar/eddsa-2022-cryptosuite)_
+# Data Integrity Selective Disclosure Primitives _(@digitalbazaar/di-sd-primitives)_
 
-[![Build status](https://img.shields.io/github/workflow/status/digitalbazaar/eddsa-2022-cryptosuite/Node.js%20CI)](https://github.com/digitalbazaar/eddsa-2022-cryptosuite/actions?query=workflow%3A%22Node.js+CI%22)
-[![Coverage status](https://img.shields.io/codecov/c/github/digitalbazaar/eddsa-2022-cryptosuite)](https://codecov.io/gh/digitalbazaar/eddsa-2022-cryptosuite)
-[![NPM Version](https://img.shields.io/npm/v/@digitalbazaar/eddsa-2022-cryptosuite.svg)](https://npm.im/@digitalbazaar/eddsa-2022-cryptosuite)
+[![Build status](https://img.shields.io/github/workflow/status/digitalbazaar/di-sd-primitives/Node.js%20CI)](https://github.com/digitalbazaar/di-sd-primitives/actions?query=workflow%3A%22Node.js+CI%22)
+[![Coverage status](https://img.shields.io/codecov/c/github/digitalbazaar/di-sd-primitives)](https://codecov.io/gh/digitalbazaar/di-sd-primitives)
+[![NPM Version](https://img.shields.io/npm/v/@digitalbazaar/di-sd-primitives.svg)](https://npm.im/@digitalbazaar/di-sd-primitives)
 
-> Eddsa 2022 Data Integrity Cryptosuite for use with jsonld-signatures.
+> Data Integrity Selective Disclosure Primitives for use with Data Integrity
+selective disclosure cryptosuites and jsonld-signatures.
 
 ## Table of Contents
 
@@ -18,7 +19,7 @@
 
 ## Background
 
-For use with https://github.com/digitalbazaar/jsonld-signatures v11.0 and above.
+For use with https://github.com/digitalbazaar/jsonld-signatures v11.2 and above.
 
 See also related specs:
 
@@ -35,14 +36,14 @@ TBD
 To install from NPM:
 
 ```
-npm install @digitalbazaar/eddsa-2022-cryptosuite
+npm install @digitalbazaar/di-sd-primitives
 ```
 
 To install locally (for development):
 
 ```
-git clone https://github.com/digitalbazaar/eddsa-2022-cryptosuite.git
-cd eddsa-2022-cryptosuite
+git clone https://github.com/digitalbazaar/di-sd-primitives.git
+cd di-sd-primitives
 npm install
 ```
 
@@ -52,107 +53,39 @@ The following code snippet provides a complete example of digitally signing
 a verifiable credential using this library:
 
 ```javascript
-import * as Ed25519Multikey from '@digitalbazaar/ed25519-multikey';
-import {DataIntegrityProof} from '@digitalbazaar/data-integrity';
-import {cryptosuite as eddsa2022CryptoSuite} from
-  '@digitalbazaar/eddsa-2022-cryptosuite';
-import jsigs from 'jsonld-signatures';
-const {purposes: {AssertionProofPurpose}} = jsigs;
+import * as primitives from '@digitalbazaar/di-sd-primitives';
 
+// canonize a document (e.g., Verifiable Credential (VC)) and replace blank
+// node IDs that are informationally decoupled from the data in the document
+const hmac = await primitives.createHmac({key: hmacKey});
+const result = await primitives.hmacIdCanonize(
+  {document: credential, options: {documentLoader}, hmac});
 
-// create the unsigned credential
-const unsignedCredential = {
-  '@context': [
-    'https://www.w3.org/2018/credentials/v1',
-    {
-      AlumniCredential: 'https://schema.org#AlumniCredential',
-      alumniOf: 'https://schema.org#alumniOf'
-    }
-  ],
-  id: 'http://example.edu/credentials/1872',
-  type: [ 'VerifiableCredential', 'AlumniCredential' ],
-  issuer: 'https://example.edu/issuers/565049',
-  issuanceDate: '2010-01-01T19:23:24Z',
-  credentialSubject: {
-    id: 'https://example.edu/students/alice',
-    alumniOf: 'Example University'
-  }
-};
+// canonize a document (e.g., VC) and replace blank node IDs with any
+// values; most useful for verifiers to use a label map provided in a
+// selectively disclosed proof (verifiers do not get the HMAC key, so they
+// cannot generate *any* HMAC'd ID, they only get the disclosed labels)
+const labelMap = new Map([
+  ['c14n0', 'uSomeBase64UrlHMACDigest1'],
+  ['c14n1', 'uSomeBase64UrlHMACDigest2'],
+  ['c14n2', 'uSomeBase64UrlHMACDigest3']
+]);
+const result = await primitives.hmacIdCanonize(
+  {document: credential, options: {documentLoader}, labelMap});
 
-// create the keypair to use when signing
-const controller = 'https://example.edu/issuers/565049';
-const keyPair = await Ed25519Multikey.from({
-  '@context': 'https://w3id.org/security/multikey/v1',
-  type: 'Multikey',
-  controller,
-  id: controller + '#z6MkwXG2WjeQnNxSoynSGYU8V9j3QzP3JSqhdmkHc6SaVWoT',
-  publicKeyMultibase: 'z6MkwXG2WjeQnNxSoynSGYU8V9j3QzP3JSqhdmkHc6SaVWoT',
-  secretKeyMultibase: 'zrv3rbPamVDGvrm7LkYPLWYJ35P9audujKKsWn3x29EUiGwwhdZQd' +
-    '1iHhrsmZidtVALBQmhX3j9E5Fvx6Kr29DPt6LH'
-});
-
-// export public key and add to document loader
-const publicKey = await keyPair.export({publicKey: true, includeContext: true});
-addDocumentToLoader({url: publicKey.id, document: publicKey});
-
-// create key's controller document
-const controllerDoc = {
-  '@context': [
-    'https://www.w3.org/ns/did/v1',
-    'https://w3id.org/security/multikey/v1'
-  ],
-  id: controller,
-  assertionMethod: [publicKey]
-};
-addDocumentToLoader({url: controllerDoc.id, document: controllerDoc});
-
-// create suite
-const suite = new DataIntegrityProof({
-  signer: keyPair.signer(), cryptosuite: eddsa2022CryptoSuite
-});
-
-// create signed credential
-const signedCredential = await jsigs.sign(unsignedCredential, {
-  suite,
-  purpose: new AssertionProofPurpose(),
-  documentLoader
-});
-
-// results in the following signed VC
-{
-  "@context": [
-    "https://www.w3.org/2018/credentials/v1",
-    {
-      "AlumniCredential": "https://schema.org#AlumniCredential",
-      "alumniOf": "https://schema.org#alumniOf"
-    },
-    "https://w3id.org/security/data-integrity/v1"
-  ],
-  "id": "http://example.edu/credentials/1872",
-  "type": [
-    "VerifiableCredential",
-    "AlumniCredential"
-  ],
-  "issuer": "https://example.edu/issuers/565049",
-  "issuanceDate": "2010-01-01T19:23:24Z",
-  "credentialSubject": {
-    "id": "https://example.edu/students/alice",
-    "alumniOf": "Example University"
-  },
-  "proof": {
-    "type": "DataIntegrityProof",
-    "created": "2022-09-06T12:33:46Z",
-    "verificationMethod": "https://example.edu/issuers/565049#z6MkwXG2WjeQnNxSoynSGYU8V9j3QzP3JSqhdmkHc6SaVWoT",
-    "cryptosuite": "eddsa-2022",
-    "proofPurpose": "assertionMethod",
-    "proofValue": "zT2U2xRCkXVPbkk4kKmemPa9zXSV7wfngQVq9uXjo3GgqZs6Te2NFLH8dRKQaqQfNhsGxEdmYkjJPy1EPkK67KnJ"
-  }
-}
+// convert JSON pointers to a JSON-LD frame that can be used to select
+// data from a document (e.g., VC)
+const pointers = [
+  '/credentialSubject/driverLicense/dateOfBirth',
+  '/credentialSubject/driverLicense/expirationDate'
+];
+const result = await primitives.pointersToFrame(
+  {document: credential, pointers});
 ```
 
 ## Contribute
 
-See [the contribute file](https://github.com/digitalbazaar/bedrock/blob/master/CONTRIBUTING.md)!
+See [the contribute file](https://github.com/digitalbazaar/di-sd-primitives/blob/master/CONTRIBUTING.md)!
 
 PRs accepted.
 
@@ -166,4 +99,4 @@ Digital Bazaar: support@digitalbazaar.com
 
 ## License
 
-[New BSD License (3-clause)](LICENSE) © 2022 Digital Bazaar
+[New BSD License (3-clause)](LICENSE) © 2023 Digital Bazaar
