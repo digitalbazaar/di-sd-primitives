@@ -31,7 +31,7 @@
     "c8": "^7.13.0",
     "chai": "^4.3.7",
     "cross-env": "^7.0.3",
-    "eslint": "^8.40.0",
+    "eslint": "^8.41.0",
     "eslint-config-digitalbazaar": "^5.0.1",
     "eslint-plugin-jsdoc": "^44.2.4",
     "eslint-plugin-unicorn": "^47.0.0",
