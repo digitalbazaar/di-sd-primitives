@@ -85,7 +85,7 @@ const result = await primitives.pointersToFrame(
 
 ## Contribute
 
-See [the contribute file](https://github.com/digitalbazaar/di-sd-primitives/blob/master/CONTRIBUTING.md)!
+See [the contribute file](https://github.com/digitalbazaar/bedrock/blob/master/CONTRIBUTING.md)!
 
 PRs accepted.
 
