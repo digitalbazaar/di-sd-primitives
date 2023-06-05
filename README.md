@@ -4,8 +4,8 @@
 [![Coverage Status](https://img.shields.io/codecov/c/github/digitalbazaar/di-sd-primitives)](https://codecov.io/gh/digitalbazaar/di-sd-primitives)
 [![NPM Version](https://img.shields.io/npm/v/@digitalbazaar/di-sd-primitives.svg)](https://npm.im/@digitalbazaar/di-sd-primitives)
 
-> Data Integrity Selective Disclosure Primitives for use with Data Integrity
-selective disclosure cryptosuites and jsonld-signatures.
+> DI-SD (Pronounced "DICED") (Data Integrity Selective Disclosure) Primitives for use
+with Data Integrity selective disclosure cryptosuites and jsonld-signatures.
 
 ## Table of Contents
 
