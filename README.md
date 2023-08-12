@@ -31,7 +31,7 @@ TBD
 
 ## Install
 
-- Browsers and Node.js 16+ are supported.
+- Browsers and Node.js 18+ are supported.
 
 To install from NPM:
 
@@ -73,13 +73,22 @@ const labelMap = new Map([
 const result = await primitives.hmacIdCanonize(
   {document: credential, options: {documentLoader}, labelMap});
 
-// convert JSON pointers to a JSON-LD frame that can be used to select
-// data from a document (e.g., VC)
+// convert JSON pointers to JSON-LD frames that can be used to filter
+// N-Quads from specific selection of document (e.g., VC)
 const pointers = [
   '/credentialSubject/driverLicense/dateOfBirth',
   '/credentialSubject/driverLicense/expirationDate'
 ];
-const result = await primitives.pointersToFrame(
+const frames = await primitives.pointersToFrames(
+  {document: credential, pointers});
+
+// use JSON pointers to select a specific part of a JSON-LD document
+// (e.g., VC)
+const pointers = [
+  '/credentialSubject/driverLicense/dateOfBirth',
+  '/credentialSubject/driverLicense/expirationDate'
+];
+const result = await primitives.select(
   {document: credential, pointers});
 ```
 
