@@ -13,18 +13,26 @@ import {loader} from './documentLoader.js';
 
 const documentLoader = loader.build();
 
-describe('hmacIdCanonize()', () => {
+describe('labelReplacementCanonicalizeJsonLd()', () => {
   it('should HMAC ID canonize w/o blank nodes', async () => {
     let result;
     let error;
     try {
-      result = await primitives.hmacIdCanonize(
-        {document: alumniCredential, options: {documentLoader}});
+      const hmac = await primitives.createHmac({key: hmacKey});
+      const labelMapFactoryFunction =
+        primitives.createHmacIdLabelMapFunction({hmac});
+      result = await primitives.labelReplacementCanonicalizeJsonLd({
+        document: alumniCredential,
+        labelMapFactoryFunction,
+        options: {documentLoader}
+      });
     } catch(e) {
       error = e;
     }
     expect(error).to.not.exist;
     expect(result).to.exist;
+
+    result.should.have.keys(['nquads', 'labelMap']);
 
     /* eslint-disable max-len */
     const expectedResult = [
@@ -36,7 +44,7 @@ describe('hmacIdCanonize()', () => {
       '<urn:uuid:d58b2365-0951-4373-96c8-e886d61829f2> <https://schema.org#alumniOf> "Example University" .\n'
     ];
     /* eslint-enable max-len */
-    result.should.deep.equal(expectedResult);
+    result.nquads.should.deep.equal(expectedResult);
   });
 
   it('should HMAC ID canonize w/ labelMap w/ blank nodes', async () => {
@@ -49,13 +57,20 @@ describe('hmacIdCanonize()', () => {
     let result;
     let error;
     try {
-      result = await primitives.hmacIdCanonize(
-        {document: dlCredentialNoIds, options: {documentLoader}, labelMap});
+      const labelMapFactoryFunction =
+        primitives.createLabelMapFunction({labelMap});
+      result = await primitives.labelReplacementCanonicalizeJsonLd({
+        document: dlCredentialNoIds,
+        labelMapFactoryFunction,
+        options: {documentLoader}
+      });
     } catch(e) {
       error = e;
     }
     expect(error).to.not.exist;
     expect(result).to.exist;
+
+    result.should.have.keys(['nquads', 'labelMap']);
 
     /* eslint-disable max-len */
     const expectedResult = [
@@ -72,7 +87,7 @@ describe('hmacIdCanonize()', () => {
       '_:c14n3_new <https://www.w3.org/2018/credentials#issuer> <did:key:zDnaekGZTbQBerwcehBSXLqAg6s55hVEBms1zFy89VHXtJSa9> .\n'
     ];
     /* eslint-enable max-len */
-    result.should.deep.equal(expectedResult);
+    result.nquads.should.deep.equal(expectedResult);
   });
 
   it('should HMAC ID canonize w/ hmac w/ blank nodes', async () => {
@@ -80,13 +95,20 @@ describe('hmacIdCanonize()', () => {
     let error;
     try {
       const hmac = await primitives.createHmac({key: hmacKey});
-      result = await primitives.hmacIdCanonize(
-        {document: dlCredentialNoIds, options: {documentLoader}, hmac});
+      const labelMapFactoryFunction =
+        primitives.createHmacIdLabelMapFunction({hmac});
+      result = await primitives.labelReplacementCanonicalizeJsonLd({
+        document: dlCredentialNoIds,
+        labelMapFactoryFunction,
+        options: {documentLoader}
+      });
     } catch(e) {
       error = e;
     }
     expect(error).to.not.exist;
     expect(result).to.exist;
+
+    result.should.have.keys(['nquads', 'labelMap']);
 
     /* eslint-disable max-len */
     const expectedResult = [
@@ -103,6 +125,6 @@ describe('hmacIdCanonize()', () => {
       '_:uXqefD0KC4zrzEbFJhvdhYTGzRYW3RhjcQvfkpkWqDpc <urn:example:issuingAuthority> \"VA\" .\n'
     ];
     /* eslint-enable max-len */
-    result.should.deep.equal(expectedResult);
+    result.nquads.should.deep.equal(expectedResult);
   });
 });

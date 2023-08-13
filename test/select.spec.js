@@ -5,51 +5,110 @@ import {expect} from 'chai';
 
 import * as primitives from '../lib/index.js';
 import {
-  alumniCredential,
   dlCredential,
-  dlCredentialNoIds,
-  FRAME_FLAGS
+  dlCredentialNoIds
 } from './mock-data.js';
-import jsonld from 'jsonld';
 import {loader} from './documentLoader.js';
 
 const documentLoader = loader.build();
 
-describe.skip('select()', () => {
-  it('should convert one JSON pointer w/ types', async () => {
-    const pointer = '/credentialSubject/id';
+describe('select()', () => {
+  it('should select JSON-LD matching N JSON pointers w/ IDs', async () => {
+    const pointers = [
+      '/credentialSubject/driverLicense/dateOfBirth',
+      '/credentialSubject/driverLicense/expirationDate'
+    ];
 
     let result;
     let error;
     try {
-      result = await primitives.pointersToFrame(
-        {document: alumniCredential, pointers: [pointer]});
+      result = await primitives.selectJsonLd(
+        {document: dlCredential, pointers});
     } catch(e) {
       error = e;
     }
     expect(error).to.not.exist;
     expect(result).to.exist;
 
-    const expectedFrame = {
-      '@context': alumniCredential['@context'],
-      id: alumniCredential.id,
-      type: alumniCredential.type,
+    const expected = {
+      '@context': dlCredential['@context'],
+      id: dlCredential.id,
+      type: dlCredential.type,
       credentialSubject: {
-        id: alumniCredential.credentialSubject.id
+        id: dlCredential.credentialSubject.id,
+        driverLicense: {
+          type: dlCredential.credentialSubject.driverLicense.type,
+          dateOfBirth:
+            dlCredential.credentialSubject.driverLicense.dateOfBirth,
+          expirationDate:
+            dlCredential.credentialSubject.driverLicense.expirationDate
+        }
       }
     };
-    result.should.deep.equal(expectedFrame);
+    result.should.deep.equal(expected);
   });
 
-  it('should convert one JSON pointer w/o types', async () => {
-    const pointer = '/credentialSubject/id';
+  it('should select JSON-LD matching N JSON pointers w/o IDs', async () => {
+    const pointers = [
+      '/credentialSubject/driverLicense/dateOfBirth',
+      '/credentialSubject/driverLicense/expirationDate'
+    ];
 
     let result;
     let error;
     try {
-      result = await primitives.pointersToFrame({
-        document: alumniCredential, pointers: [pointer],
-        includeTypes: false
+      result = await primitives.selectJsonLd(
+        {document: dlCredentialNoIds, pointers});
+    } catch(e) {
+      error = e;
+    }
+    expect(error).to.not.exist;
+    expect(result).to.exist;
+
+    const expected = {
+      '@context': dlCredentialNoIds['@context'],
+      type: dlCredentialNoIds.type,
+      credentialSubject: {
+        driverLicense: {
+          type: dlCredentialNoIds.credentialSubject.driverLicense.type,
+          dateOfBirth:
+            dlCredentialNoIds.credentialSubject.driverLicense.dateOfBirth,
+          expirationDate:
+            dlCredential.credentialSubject.driverLicense.expirationDate
+        }
+      }
+    };
+    result.should.deep.equal(expected);
+  });
+
+  it('should select N-Quads matching N JSON pointers w/ IDs', async () => {
+    const pointers = [
+      '/credentialSubject/driverLicense/dateOfBirth',
+      '/credentialSubject/driverLicense/expirationDate'
+    ];
+
+    let result;
+    let error;
+    try {
+      // skolemize input
+      const options = {documentLoader};
+      const skolemized = await primitives.skolemizeCompactJsonLd(
+        {document: dlCredential, options});
+
+      // canonicalize deskolemized data to get stable label map
+      const deskolemized = await primitives.toDeskolemizedNQuads(
+        {document: skolemized.expanded, options});
+      let canonicalIdMap = new Map();
+      await primitives.canonicalize(
+        deskolemized.join(''),
+        {...options, inputFormat: 'application/n-quads', canonicalIdMap});
+      // implementation-specific bnode prefix fix
+      canonicalIdMap = primitives.stripBlankNodePrefixes(canonicalIdMap);
+
+      // select from skolemized compact JSON-LD
+      result = await primitives.selectCanonicalNQuads({
+        document: skolemized.compact, pointers,
+        labelMap: canonicalIdMap, options
       });
     } catch(e) {
       error = e;
@@ -57,75 +116,25 @@ describe.skip('select()', () => {
     expect(error).to.not.exist;
     expect(result).to.exist;
 
-    const expectedFrame = {
-      '@context': alumniCredential['@context'],
-      id: alumniCredential.id,
-      credentialSubject: {
-        id: alumniCredential.credentialSubject.id
-      }
-    };
-    result.should.deep.equal(expectedFrame);
+    result.should.have.keys(['selection', 'deskolemizedNQuads', 'nquads']);
+
+    /* eslint-disable max-len */
+    /* eslint-disable quotes */
+    const expected = [
+      "<urn:uuid:1a0e4ef5-091f-4060-842e-18e519ab9440> <urn:example:driverLicense> _:c14n0 .\n",
+      "<urn:uuid:36245ee9-9074-4b05-a777-febff2e69757> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n",
+      "<urn:uuid:36245ee9-9074-4b05-a777-febff2e69757> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicenseCredential> .\n",
+      "<urn:uuid:36245ee9-9074-4b05-a777-febff2e69757> <https://www.w3.org/2018/credentials#credentialSubject> <urn:uuid:1a0e4ef5-091f-4060-842e-18e519ab9440> .\n",
+      "_:c14n0 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicense> .\n",
+      "_:c14n0 <urn:example:dateOfBirth> \"01-01-1990\" .\n",
+      "_:c14n0 <urn:example:expiration> \"01-01-2030\" .\n"
+    ];
+    /* eslint-enable max-len */
+    /* eslint-enable quotes */
+    result.nquads.sort().should.deep.equal(expected);
   });
 
-  it('should convert one nested JSON pointer w/ IDs', async () => {
-    const pointer = '/credentialSubject/driverLicense/dateOfBirth';
-
-    let result;
-    let error;
-    try {
-      result = await primitives.pointersToFrame(
-        {document: dlCredential, pointers: [pointer]});
-    } catch(e) {
-      error = e;
-    }
-    expect(error).to.not.exist;
-    expect(result).to.exist;
-
-    const expectedFrame = {
-      '@context': dlCredential['@context'],
-      id: dlCredential.id,
-      type: dlCredential.type,
-      credentialSubject: {
-        id: dlCredential.credentialSubject.id,
-        driverLicense: {
-          type: dlCredential.credentialSubject.driverLicense.type,
-          dateOfBirth:
-            dlCredential.credentialSubject.driverLicense.dateOfBirth
-        }
-      }
-    };
-    result.should.deep.equal(expectedFrame);
-  });
-
-  it('should convert one nested JSON pointer w/o IDs', async () => {
-    const pointer = '/credentialSubject/driverLicense/dateOfBirth';
-
-    let result;
-    let error;
-    try {
-      result = await primitives.pointersToFrame(
-        {document: dlCredentialNoIds, pointers: [pointer]});
-    } catch(e) {
-      error = e;
-    }
-    expect(error).to.not.exist;
-    expect(result).to.exist;
-
-    const expectedFrame = {
-      '@context': dlCredentialNoIds['@context'],
-      type: dlCredentialNoIds.type,
-      credentialSubject: {
-        driverLicense: {
-          type: dlCredentialNoIds.credentialSubject.driverLicense.type,
-          dateOfBirth:
-          dlCredentialNoIds.credentialSubject.driverLicense.dateOfBirth
-        }
-      }
-    };
-    result.should.deep.equal(expectedFrame);
-  });
-
-  it('should convert N JSON pointers w/ IDs', async () => {
+  it('should select N-Quads matching N JSON pointers w/o IDs', async () => {
     const pointers = [
       '/credentialSubject/driverLicense/dateOfBirth',
       '/credentialSubject/driverLicense/expirationDate'
@@ -134,134 +143,45 @@ describe.skip('select()', () => {
     let result;
     let error;
     try {
-      result = await primitives.pointersToFrame(
-        {document: dlCredential, pointers});
+      // skolemize input
+      const options = {documentLoader};
+      const skolemized = await primitives.skolemizeCompactJsonLd(
+        {document: dlCredentialNoIds, options});
+
+      // canonicalize deskolemized data to get stable label map
+      const deskolemized = await primitives.toDeskolemizedNQuads(
+        {document: skolemized.expanded, options});
+      let canonicalIdMap = new Map();
+      await primitives.canonicalize(
+        deskolemized.join(''),
+        {...options, inputFormat: 'application/n-quads', canonicalIdMap});
+      // implementation-specific bnode prefix fix
+      canonicalIdMap = primitives.stripBlankNodePrefixes(canonicalIdMap);
+
+      // select from skolemized compact JSON-LD
+      result = await primitives.selectCanonicalNQuads({
+        document: skolemized.compact, pointers,
+        labelMap: canonicalIdMap, options
+      });
     } catch(e) {
       error = e;
     }
     expect(error).to.not.exist;
     expect(result).to.exist;
 
-    const expectedFrame = {
-      '@context': dlCredential['@context'],
-      id: dlCredential.id,
-      type: dlCredential.type,
-      credentialSubject: {
-        id: dlCredential.credentialSubject.id,
-        driverLicense: {
-          type: dlCredential.credentialSubject.driverLicense.type,
-          dateOfBirth:
-            dlCredential.credentialSubject.driverLicense.dateOfBirth,
-          expirationDate:
-            dlCredential.credentialSubject.driverLicense.expirationDate
-        }
-      }
-    };
-    result.should.deep.equal(expectedFrame);
-  });
+    result.should.have.keys(['selection', 'deskolemizedNQuads', 'nquads']);
 
-  it('should convert N JSON pointers w/o IDs', async () => {
-    const pointers = [
-      '/credentialSubject/driverLicense/dateOfBirth',
-      '/credentialSubject/driverLicense/expirationDate'
+    /* eslint-disable max-len */
+    const expected = [
+      '_:c14n0 <urn:example:driverLicense> _:c14n1 .\n',
+      '_:c14n1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicense> .\n',
+      '_:c14n1 <urn:example:dateOfBirth> "01-01-1990" .\n',
+      '_:c14n1 <urn:example:expiration> "01-01-2030" .\n',
+      '_:c14n2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n',
+      '_:c14n2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicenseCredential> .\n',
+      '_:c14n2 <https://www.w3.org/2018/credentials#credentialSubject> _:c14n0 .\n'
     ];
-
-    let result;
-    let error;
-    try {
-      result = await primitives.pointersToFrame(
-        {document: dlCredentialNoIds, pointers});
-    } catch(e) {
-      error = e;
-    }
-    expect(error).to.not.exist;
-    expect(result).to.exist;
-
-    const expectedFrame = {
-      '@context': dlCredentialNoIds['@context'],
-      type: dlCredentialNoIds.type,
-      credentialSubject: {
-        driverLicense: {
-          type: dlCredentialNoIds.credentialSubject.driverLicense.type,
-          dateOfBirth:
-            dlCredentialNoIds.credentialSubject.driverLicense.dateOfBirth,
-          expirationDate:
-            dlCredential.credentialSubject.driverLicense.expirationDate
-        }
-      }
-    };
-    result.should.deep.equal(expectedFrame);
-  });
-
-  it('should select data matching N JSON pointers w/ IDs', async () => {
-    const pointers = [
-      '/credentialSubject/driverLicense/dateOfBirth',
-      '/credentialSubject/driverLicense/expirationDate'
-    ];
-
-    let result;
-    let error;
-    try {
-      const frame = await primitives.pointersToFrame(
-        {document: dlCredential, pointers});
-      const options = {...FRAME_FLAGS, safe: true, documentLoader};
-      result = await jsonld.frame(dlCredential, frame, options);
-    } catch(e) {
-      error = e;
-    }
-    expect(error).to.not.exist;
-    expect(result).to.exist;
-
-    const expected = {
-      '@context': dlCredential['@context'],
-      id: dlCredential.id,
-      type: dlCredential.type,
-      credentialSubject: {
-        id: dlCredential.credentialSubject.id,
-        driverLicense: {
-          type: dlCredential.credentialSubject.driverLicense.type,
-          dateOfBirth:
-            dlCredential.credentialSubject.driverLicense.dateOfBirth,
-          expirationDate:
-            dlCredential.credentialSubject.driverLicense.expirationDate
-        }
-      }
-    };
-    result.should.deep.equal(expected);
-  });
-
-  it('should select data matching N JSON pointers w/o IDs', async () => {
-    const pointers = [
-      '/credentialSubject/driverLicense/dateOfBirth',
-      '/credentialSubject/driverLicense/expirationDate'
-    ];
-
-    let result;
-    let error;
-    try {
-      const frame = await primitives.pointersToFrame(
-        {document: dlCredentialNoIds, pointers});
-      const options = {...FRAME_FLAGS, safe: true, documentLoader};
-      result = await jsonld.frame(dlCredentialNoIds, frame, options);
-    } catch(e) {
-      error = e;
-    }
-    expect(error).to.not.exist;
-    expect(result).to.exist;
-
-    const expected = {
-      '@context': dlCredentialNoIds['@context'],
-      type: dlCredentialNoIds.type,
-      credentialSubject: {
-        driverLicense: {
-          type: dlCredentialNoIds.credentialSubject.driverLicense.type,
-          dateOfBirth:
-            dlCredentialNoIds.credentialSubject.driverLicense.dateOfBirth,
-          expirationDate:
-            dlCredential.credentialSubject.driverLicense.expirationDate
-        }
-      }
-    };
-    result.should.deep.equal(expected);
+    /* eslint-enable max-len */
+    result.nquads.sort().should.deep.equal(expected);
   });
 });
