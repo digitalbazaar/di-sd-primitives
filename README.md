@@ -58,8 +58,11 @@ import * as primitives from '@digitalbazaar/di-sd-primitives';
 // canonize a document (e.g., Verifiable Credential (VC)) and replace blank
 // node IDs that are informationally decoupled from the data in the document
 const hmac = await primitives.createHmac({key: hmacKey});
-const result = await primitives.hmacIdCanonize(
-  {document: credential, options: {documentLoader}, hmac});
+const labelMapFactoryFunction =
+  primitives.createHmacIdLabelMapFunction({hmac});
+// returns an array of nquads
+const result = await primitives.labelReplacementCanonicalizeJsonLd(
+  {document: credential, labelMapFactoryFunction, options: {documentLoader}});
 
 // canonize a document (e.g., VC) and replace blank node IDs with any
 // values; most useful for verifiers to use a label map provided in a
@@ -70,25 +73,49 @@ const labelMap = new Map([
   ['c14n1', 'uSomeBase64UrlHMACDigest2'],
   ['c14n2', 'uSomeBase64UrlHMACDigest3']
 ]);
-const result = await primitives.hmacIdCanonize(
-  {document: credential, options: {documentLoader}, labelMap});
+const labelMapFactoryFunction = primitives.createLabelMapFunction({labelMap});
+// returns an array of nquads
+const result = await primitives.labelReplacementCanonicalizeJsonLd(
+  {document: credential, labelMapFactoryFunction, options: {documentLoader}});
 
-// convert JSON pointers to JSON-LD frames that can be used to filter
-// N-Quads from specific selection of document (e.g., VC)
-const pointers = [
-  '/credentialSubject/driverLicense/dateOfBirth',
-  '/credentialSubject/driverLicense/expirationDate'
-];
-const frames = await primitives.pointersToFrames(
-  {document: credential, pointers});
+// skolemize a document (e.g., VC), which replaces blank node IDs with stable
+// URL IDs; most useful for performing selecting portions of a JSON-LD document
+// and finding the matching selected N-Quads;
+// `result` has `{expanded, compact}` for both expanded and compact forms of
+// the skolemized JSON-LD document; the compact form may have selections
+// performed against it and then be either converted to deskolemized N-Quads,
+// the expanded form can be converted to deskolemized N-Quads and canonicalized
+// to produce a stable label map that will map any deskolemized blank node
+// IDs to canonical IDs that match the entire document
+const result = await skolemizeCompactJsonLd({document, options});
+
+// get deskolemized N-Quads from a document; most useful for converting
+// previously skolemized expanded JSON-LD documents to canonicalize and
+// generate a map of stable identifiers or for converting previously skolemized
+// compact JSON-LD documents after selecting a portion of them for selective
+// disclosure; see `selectCanonicalNQuads` primitive
+const deskolemizedNQuads = await toDeskolemizedNQuads(
+  {document: skolemizedExpandedOrCompactJsonLd, options});
+
+// canonize N-Quads and replace blank node IDs and get a label mapping from
+// the original blank node IDs to the new ones; most useful for canonizing
+// deskolemized N-Quads to produce a
+const hmac = await primitives.createHmac({key: hmacKey});
+const labelMapFactoryFunction =
+  primitives.createHmacIdLabelMapFunction({hmac});
+// returns an object with `{nquads, labelMap}`, the array of nquads and the
+// mapping from input blank node IDs to output blank node IDs (after the
+// canonical IDs have been replaced using the given replacement label map)
+const result = await primitives.labelReplacementCanonicalizeNQuads(
+  {nquads, labelMapFactoryFunction, options: {documentLoader}});
 
 // use JSON pointers to select a specific part of a JSON-LD document
-// (e.g., VC)
+// (e.g., VC); can be used on a regular or skolemized compact JSON-LD document
 const pointers = [
   '/credentialSubject/driverLicense/dateOfBirth',
   '/credentialSubject/driverLicense/expirationDate'
 ];
-const result = await primitives.select(
+const result = await primitives.selectJsonLd(
   {document: credential, pointers});
 ```
 
