@@ -82,11 +82,12 @@ const result = await primitives.labelReplacementCanonicalizeJsonLd(
 // URL IDs; most useful for performing selecting portions of a JSON-LD document
 // and finding the matching selected N-Quads;
 // `result` has `{expanded, compact}` for both expanded and compact forms of
-// the skolemized JSON-LD document; the compact form may have selections
-// performed against it and then be either converted to deskolemized N-Quads,
-// the expanded form can be converted to deskolemized N-Quads and canonicalized
-// to produce a stable label map that will map any deskolemized blank node
-// IDs to canonical IDs that match the entire document
+// the skolemized JSON-LD document; the expanded form is often deskolemized to
+// N-Quads and then canonicalized to produce canonical N-Quads and a mapping
+// from the deskolemized blank node IDs to the canonical IDs; the compact form
+// can then have N-many selection operations performed on it with the selection
+// outputs too being converted to deskolemized N-Quads which can be mapped to
+// matching canonical N-Quads
 const result = await skolemizeCompactJsonLd({document, options});
 
 // get deskolemized N-Quads from a document; most useful for converting
