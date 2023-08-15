@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 3.0.0 - 2023-08-dd
+## 3.0.0 - 2023-08-15
 
 ### Changed
 - **BREAKING**: Primitive functions have been reworked to be simpler by using
