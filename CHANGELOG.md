@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 3.0.1 - 2023-12-dd
+## 3.0.1 - 2023-12-12
 
 ### Fixed
 - Fix skolemization of existing blank node identifier.
