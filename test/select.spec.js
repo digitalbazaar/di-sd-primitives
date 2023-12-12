@@ -2,6 +2,7 @@
  * Copyright (c) 2023 Digital Bazaar, Inc. All rights reserved.
  */
 import {expect} from 'chai';
+import {klona} from 'klona';
 
 import * as primitives from '../lib/index.js';
 import {
@@ -151,6 +152,64 @@ describe('select()', () => {
       // canonicalize deskolemized data to get stable label map
       const deskolemized = await primitives.toDeskolemizedNQuads(
         {document: skolemized.expanded, options});
+      let canonicalIdMap = new Map();
+      await primitives.canonicalize(
+        deskolemized.join(''),
+        {...options, inputFormat: 'application/n-quads', canonicalIdMap});
+      // implementation-specific bnode prefix fix
+      canonicalIdMap = primitives.stripBlankNodePrefixes(canonicalIdMap);
+
+      // select from skolemized compact JSON-LD
+      result = await primitives.selectCanonicalNQuads({
+        document: skolemized.compact, pointers,
+        labelMap: canonicalIdMap, options
+      });
+    } catch(e) {
+      error = e;
+    }
+    expect(error).to.not.exist;
+    expect(result).to.exist;
+
+    result.should.have.keys(['selection', 'deskolemizedNQuads', 'nquads']);
+
+    /* eslint-disable max-len */
+    const expected = [
+      '_:c14n0 <urn:example:driverLicense> _:c14n1 .\n',
+      '_:c14n1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicense> .\n',
+      '_:c14n1 <urn:example:dateOfBirth> "01-01-1990" .\n',
+      '_:c14n1 <urn:example:expiration> "01-01-2030" .\n',
+      '_:c14n2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n',
+      '_:c14n2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicenseCredential> .\n',
+      '_:c14n2 <https://www.w3.org/2018/credentials#credentialSubject> _:c14n0 .\n'
+    ];
+    /* eslint-enable max-len */
+    result.nquads.sort().should.deep.equal(expected);
+  });
+
+  it('should select N-Quads w/existing blank node IDs', async () => {
+    const pointers = [
+      '/credentialSubject/driverLicense/id',
+      '/credentialSubject/driverLicense/dateOfBirth',
+      '/credentialSubject/driverLicense/expirationDate'
+    ];
+
+    let result;
+    let error;
+    try {
+      // skolemize input
+      const options = {documentLoader};
+      const document = klona(dlCredentialNoIds);
+      document.credentialSubject.driverLicense.id = '_:b123';
+      const skolemized = await primitives.skolemizeCompactJsonLd(
+        {document, options});
+
+      // canonicalize deskolemized data to get stable label map
+      const deskolemized = await primitives.toDeskolemizedNQuads(
+        {document: skolemized.expanded, options});
+      // ensure blank node ID is preserved
+      deskolemized.join('').includes('<urn:example:driverLicense> _:b123 .\n')
+        .should.equal(true);
+
       let canonicalIdMap = new Map();
       await primitives.canonicalize(
         deskolemized.join(''),
