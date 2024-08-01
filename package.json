@@ -1,6 +1,6 @@
 {
   "name": "@digitalbazaar/di-sd-primitives",
-  "version": "3.0.2",
+  "version": "3.0.3-0",
   "description": "Data Integrity Selective Disclosure Primitives",
   "homepage": "https://github.com/digitalbazaar/di-sd-primitives",
   "repository": {
