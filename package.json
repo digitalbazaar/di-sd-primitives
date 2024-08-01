@@ -22,11 +22,11 @@
     "base64url-universal": "^2.0.0",
     "jsonld": "^8.1.1",
     "klona": "^2.0.6",
-    "rdf-canonize": "^3.4.0",
+    "rdf-canonize": "^4.0.1",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@digitalbazaar/data-integrity-context": "^1.0.0",
+    "@digitalbazaar/data-integrity-context": "^2.0.1",
     "@digitalbazaar/security-document-loader": "^2.0.0",
     "c8": "^7.13.0",
     "chai": "^4.3.7",
