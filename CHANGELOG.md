@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 3.0.2 - 2024-08-dd
+## 3.0.2 - 2024-08-01
 
 ### Changed
 - Update to latest `rdf-canonize`. Update test deps.
