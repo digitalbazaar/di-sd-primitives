@@ -20,10 +20,10 @@
   },
   "dependencies": {
     "base64url-universal": "^2.0.0",
-    "jsonld": "^8.1.1",
+    "jsonld": "^8.3.2",
     "klona": "^2.0.6",
     "rdf-canonize": "^4.0.1",
-    "uuid": "^9.0.0"
+    "uuid": "^10.0.0"
   },
   "devDependencies": {
     "@digitalbazaar/data-integrity-context": "^2.0.1",
