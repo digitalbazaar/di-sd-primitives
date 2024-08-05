@@ -1,5 +1,13 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
+## 3.0.3 - 2024-08-xx
+
+### Changed
+- Update dependencies.
+  - `jsonld@8.3.2`
+  - `uuid@10`
+- Update dev dependencies.
+
 ## 3.0.2 - 2024-08-01
 
 ### Changed
