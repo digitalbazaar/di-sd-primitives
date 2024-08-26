@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 3.0.4 - 2024-08-dd
+## 3.0.4 - 2024-08-26
 
 ### Fixed
 - Ensure latest `rdf-canonize` is used when canonicalizing.
