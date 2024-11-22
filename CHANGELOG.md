@@ -1,5 +1,10 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
+## 3.1.0 - 2024-11-xx
+
+### Added
+- Add support for `@direction`.
+
 ## 3.0.4 - 2024-08-26
 
 ### Fixed
@@ -48,4 +53,3 @@
 ## 1.0.0 - 2023-05-19
 
 - Never happened! This package started at 2.0.0.
-
