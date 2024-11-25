@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 3.1.0 - 2024-11-xx
+## 3.1.0 - 2024-11-25
 
 ### Added
 - Add support for `@direction`.
