@@ -1,6 +1,6 @@
 # Data Integrity Selective Disclosure Primitives _(@digitalbazaar/di-sd-primitives)_
 
-[![Build Status](https://img.shields.io/github/actions/workflow/status/digitalbazaar/di-sd-primitives/main.yml)](https://github.com/digitalbazaar/di-sd-primitives/actions/workflow/main.yml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/digitalbazaar/di-sd-primitives/main.yaml)](https://github.com/digitalbazaar/di-sd-primitives/actions/workflow/main.yaml)
 [![Coverage Status](https://img.shields.io/codecov/c/github/digitalbazaar/di-sd-primitives)](https://codecov.io/gh/digitalbazaar/di-sd-primitives)
 [![NPM Version](https://img.shields.io/npm/v/@digitalbazaar/di-sd-primitives.svg)](https://npm.im/@digitalbazaar/di-sd-primitives)
 
