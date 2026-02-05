@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 3.2.0 - 2026-02-xx
+## 3.2.0 - 2026-02-05
 
 ### Changed
 - Update dependencies:
