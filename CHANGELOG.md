@@ -1,5 +1,15 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
+## 3.2.0 - 2026-02-xx
+
+### Changed
+- Update dependencies:
+  - `jsonld@9`.
+  - `rdf-canonize@5`.
+- **NOTE**: The `jsonld` update may have rare edge case compatibility issues.
+  The important related `rdf-canonize` issues were addressed with the update in
+  v3.0.4.
+
 ## 3.1.0 - 2024-11-25
 
 ### Added
