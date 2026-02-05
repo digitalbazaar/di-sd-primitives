@@ -20,9 +20,9 @@
   },
   "dependencies": {
     "base64url-universal": "^2.0.0",
-    "jsonld": "^8.3.2",
+    "jsonld": "^9.0.0",
     "klona": "^2.0.6",
-    "rdf-canonize": "^4.0.1",
+    "rdf-canonize": "^5.0.0",
     "uuid": "^10.0.0"
   },
   "devDependencies": {
