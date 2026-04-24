@@ -27,14 +27,12 @@
   },
   "devDependencies": {
     "@digitalbazaar/data-integrity-context": "^2.0.1",
+    "@digitalbazaar/eslint-config": "^8.0.1",
     "@digitalbazaar/security-document-loader": "^2.1.0",
     "c8": "^10.1.2",
     "chai": "^4.5.0",
     "cross-env": "^7.0.3",
-    "eslint": "^8.57.0",
-    "eslint-config-digitalbazaar": "^5.2.0",
-    "eslint-plugin-jsdoc": "^48.11.0",
-    "eslint-plugin-unicorn": "^55.0.0",
+    "eslint": "^9.39.4",
     "karma": "^6.4.4",
     "karma-chai": "^0.1.0",
     "karma-chrome-launcher": "^3.2.0",
@@ -56,7 +54,7 @@
     "coverage": "cross-env NODE_ENV=test c8 npm run test-node",
     "coverage-ci": "cross-env NODE_ENV=test c8 --reporter=lcovonly --reporter=text-summary --reporter=text npm run test-node",
     "coverage-report": "c8 report",
-    "lint": "eslint ."
+    "lint": "eslint"
   },
   "c8": {
     "reporter": [
