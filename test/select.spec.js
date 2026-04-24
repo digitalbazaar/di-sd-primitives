@@ -119,8 +119,8 @@ describe('select()', () => {
 
     result.should.have.keys(['selection', 'deskolemizedNQuads', 'nquads']);
 
-    /* eslint-disable max-len */
-    /* eslint-disable quotes */
+    /* eslint-disable @stylistic/max-len */
+    /* eslint-disable @stylistic/quotes */
     const expected = [
       "<urn:uuid:1a0e4ef5-091f-4060-842e-18e519ab9440> <urn:example:driverLicense> _:c14n0 .\n",
       "<urn:uuid:36245ee9-9074-4b05-a777-febff2e69757> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <https://www.w3.org/2018/credentials#VerifiableCredential> .\n",
@@ -130,8 +130,8 @@ describe('select()', () => {
       "_:c14n0 <urn:example:dateOfBirth> \"01-01-1990\" .\n",
       "_:c14n0 <urn:example:expiration> \"01-01-2030\" .\n"
     ];
-    /* eslint-enable max-len */
-    /* eslint-enable quotes */
+    /* eslint-enable @stylistic/max-len */
+    /* eslint-enable @stylistic/quotes */
     result.nquads.sort().should.deep.equal(expected);
   });
 
@@ -172,7 +172,6 @@ describe('select()', () => {
 
     result.should.have.keys(['selection', 'deskolemizedNQuads', 'nquads']);
 
-    /* eslint-disable max-len */
     const expected = [
       '_:c14n0 <urn:example:driverLicense> _:c14n1 .\n',
       '_:c14n1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicense> .\n',
@@ -182,7 +181,6 @@ describe('select()', () => {
       '_:c14n2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicenseCredential> .\n',
       '_:c14n2 <https://www.w3.org/2018/credentials#credentialSubject> _:c14n0 .\n'
     ];
-    /* eslint-enable max-len */
     result.nquads.sort().should.deep.equal(expected);
   });
 
@@ -230,7 +228,6 @@ describe('select()', () => {
 
     result.should.have.keys(['selection', 'deskolemizedNQuads', 'nquads']);
 
-    /* eslint-disable max-len */
     const expected = [
       '_:c14n0 <urn:example:driverLicense> _:c14n1 .\n',
       '_:c14n1 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicense> .\n',
@@ -240,7 +237,6 @@ describe('select()', () => {
       '_:c14n2 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <urn:example:DriverLicenseCredential> .\n',
       '_:c14n2 <https://www.w3.org/2018/credentials#credentialSubject> _:c14n0 .\n'
     ];
-    /* eslint-enable max-len */
     result.nquads.sort().should.deep.equal(expected);
   });
 });
