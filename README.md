@@ -35,13 +35,13 @@ TBD
 
 To install from NPM:
 
-```
+```sh
 npm install @digitalbazaar/di-sd-primitives
 ```
 
 To install locally (for development):
 
-```
+```sh
 git clone https://github.com/digitalbazaar/di-sd-primitives.git
 cd di-sd-primitives
 npm install
