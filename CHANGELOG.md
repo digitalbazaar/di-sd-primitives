@@ -1,5 +1,12 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
+## 3.3.0 - 2026-xx-xx
+
+- **NOTE**: Update supported platforms.
+  - Test on Node.js >=20.
+  - Update `engines.node` to `>=20`.
+  - Update README requirements section.
+
 ## 3.2.0 - 2026-02-05
 
 ### Changed
