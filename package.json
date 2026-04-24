@@ -22,8 +22,7 @@
     "base64url-universal": "^2.0.0",
     "jsonld": "^9.0.0",
     "klona": "^2.0.6",
-    "rdf-canonize": "^5.0.0",
-    "uuid": "^14.0.0"
+    "rdf-canonize": "^5.0.0"
   },
   "devDependencies": {
     "@digitalbazaar/data-integrity-context": "^2.0.1",
