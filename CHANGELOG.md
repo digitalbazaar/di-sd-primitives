@@ -2,7 +2,8 @@
 
 ## 3.3.0 - 2026-xx-xx
 
-- UPdate dev dependencies.
+- Replace `uuid` with `crypto.randomUUID()`.
+- Update dev dependencies.
 - **NOTE**: Update supported platforms.
   - Test on Node.js >=20.
   - Update `engines.node` to `>=20`.
