@@ -2,6 +2,7 @@
 
 ## 3.3.0 - 2026-xx-xx
 
+### Changed
 - Replace `uuid` with `crypto.randomUUID()`.
 - Update dev dependencies.
 - **NOTE**: Update supported platforms.
