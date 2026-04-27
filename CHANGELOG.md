@@ -1,6 +1,6 @@
 # @digitalbazaar/di-sd-primitives Changelog
 
-## 3.3.0 - 2026-xx-xx
+## 3.3.0 - 2026-04-27
 
 ### Changed
 - Replace `uuid` with `crypto.randomUUID()`.
